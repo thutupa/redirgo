@@ -162,7 +162,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		http.Error(w, "Yeah!"+err.Error(), http.StatusInternalServerError)
 	}
-	err = basePageTemplate.ExecuteTemplate(w, "base.html", "")
+	err = basePageTemplate.ExecuteTemplate(w, "base.html", u.ID)
 	if err != nil {
 		http.Error(w, "Eooh!"+err.Error(), http.StatusInternalServerError)
 	}

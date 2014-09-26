@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
+	"net/url"
 	"strings"
 	"time"
 
@@ -15,7 +16,7 @@ import "github.com/crhym3/go-endpoints/endpoints"
 
 const (
 	accountKind = "Account"
-	actionKind   = "Action"
+	actionKind  = "Action"
 )
 
 // Action is a
@@ -39,7 +40,9 @@ type ActionsListResp struct {
 }
 
 // Request type for ActionsService.List
-type ActionsListReq struct{}
+type ActionsListReq struct {
+	Phrase string `json:"phrase"`
+}
 
 // List returns a list of matching actions
 func (as *ActionsService) List(r *http.Request, req *ActionsListReq, resp *ActionsListResp) error {
@@ -50,6 +53,11 @@ func (as *ActionsService) List(r *http.Request, req *ActionsListReq, resp *Actio
 	}
 	userKey := makeUserKey(c, u.ID)
 	q := datastore.NewQuery(actionKind).Ancestor(userKey)
+	if len(req.Phrase) > 0 {
+		for _, w := range strings.Split(req.Phrase, " ") {
+			q = q.Filter("actionwords =", w)
+		}
+	}
 	var actions []*Action
 	keys, err := q.GetAll(c, &actions)
 	if err != nil {
@@ -68,8 +76,8 @@ type ActionAddResp struct{}
 
 //Request type for ActionsService.List
 type ActionAddReq struct {
-	Words    string
-	Redirect string
+	Words    string `json:"words"`
+	Redirect string `json:"redirect"`
 }
 
 func makeUserKey(c appengine.Context, userID string) *datastore.Key {
@@ -82,6 +90,13 @@ func (as *ActionsService) Add(r *http.Request, req *ActionAddReq, resp *ActionAd
 	u, err := getUser(c)
 	if err != nil {
 		return err
+	}
+	if u, err := url.Parse(req.Redirect); len(u.Scheme) == 0 || err != nil {
+		if err != nil {
+			return fmt.Errorf("Url not well formed %v", err)
+		} else {
+			return fmt.Errorf("Url not well formed")
+		}
 	}
 	act := &Action{
 		Key:          nil,
@@ -126,6 +141,10 @@ func getUser(ctx appengine.Context) (*user.User, error) {
 	return u, nil
 }
 
+func templatePath(fname string) string {
+	return "client/templates/" + fname
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 	u := user.Current(c)
@@ -139,7 +158,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 		w.WriteHeader(http.StatusFound)
 		return
 	}
-	basePageTemplate, err := template.New("basePagetemplate").ParseFiles("templates/base.html")
+	basePageTemplate, err := template.New("basePagetemplate").Delims("<<<", ">>>").ParseFiles(templatePath("base.html"))
 	if err != nil {
 		http.Error(w, "Yeah!"+err.Error(), http.StatusInternalServerError)
 	}

@@ -7,14 +7,14 @@
     <script src="https://apis.google.com/js/client.js?onload=init"></script>
     <script src="/client/scripts/actions-controller.js"></script>
   </head>
-  <body style="background-color: gray" ng-controller="ActionsCtrl as ctrl">
+  <body style="background-color: #DFDFDF; font-size: 20px" ng-controller="ActionsCtrl as ctrl">
     <h2>Add Form</h2>
     <table>
       <tr><td colspan="2"><font color="red" size="+1">{{error}}</font></td></tr>
       <tr><td colspan="2"><font color="blue">{{message}}</font></td></tr>
       <tr><td> URL </td><td><input ng-model="redirect" ng-disabled="formDisabled" size=100/></td></tr>
       <tr><td> Phrase </td><td><input ng-model="words" ng-disabled="formDisabled" size=100/></td></tr>
-      <tr><td></td><td><button ng-click="startActionAdd()" ng-disabled="formDisabled">Add Action</button></td></tr>
+      <tr><td></td><td><button ng-click="startActionAdd()" ng-disabled="formDisabled" style="font-size: 20px">Add Action</button></td></tr>
     </table>
     <hr/>
     <h2>Existing actions</h2>

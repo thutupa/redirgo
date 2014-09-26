@@ -15,7 +15,6 @@ phonecatApp.controller('ActionsCtrl', function($scope, $timeout) {
 
     $scope.endActionAdd = function(resp) {
 	$scope.formDisabled = false;
-	console.log(angular.toJson(resp, true));
 	if (resp.error) {
 	  $scope.error = resp.error.message;
 	} else {
@@ -39,7 +38,6 @@ phonecatApp.controller('ActionsCtrl', function($scope, $timeout) {
     var POLL_INTERVAL = 1000;
 
     $scope.fetchItems = function() {
-      console.log("Attempting to fetch items");
       if (!gapi || !gapi.client || !gapi.client.action || !gapi.client.action.list) {
 	$timeout($scope.fetchItems, POLL_INTERVAL);
 	return;

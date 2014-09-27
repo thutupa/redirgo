@@ -1,6 +1,6 @@
-var phonecatApp = angular.module('ActionsApp', []);
+var actionsApp = angular.module('ActionsApp', []);
 
-phonecatApp.controller('ActionsCtrl', function($scope, $timeout) {
+actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     $scope.startActionAdd = function() {
         gapi.client.action.add({
             redirect: $scope.redirect,
@@ -10,7 +10,6 @@ phonecatApp.controller('ActionsCtrl', function($scope, $timeout) {
 	$scope.message = '';
 	$scope.error = '';
 	$scope.searchPhrase = '';
-	$scope.items = [];
     }
 
     $scope.endActionAdd = function(resp) {
@@ -35,18 +34,12 @@ phonecatApp.controller('ActionsCtrl', function($scope, $timeout) {
       $timeout($scope.clearMessage, 1000);
     }
 
-    var POLL_INTERVAL = 1000;
-
     $scope.fetchItems = function() {
-      if (!gapi || !gapi.client || !gapi.client.action || !gapi.client.action.list) {
-	$timeout($scope.fetchItems, POLL_INTERVAL);
-	return;
-      }
-
       gapi.client.action.list({phrase: $scope.searchPhrase}).execute(function(resp) {
 	$scope.items = resp.items;
 	$scope.$apply();
       });
     }
-    $scope.fetchItems();
+  $scope.items = [];
+  $scope.fetchItems();
 });

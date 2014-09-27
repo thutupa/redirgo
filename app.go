@@ -1,6 +1,8 @@
-package hello
+package app
 
 import (
+	"crypto/md5"
+	"errors"
 	"fmt"
 	"html/template"
 	"net/http"
@@ -17,6 +19,13 @@ import "github.com/crhym3/go-endpoints/endpoints"
 const (
 	accountKind = "Account"
 	actionKind  = "Action"
+)
+
+var (
+	scopes    = []string{endpoints.EmailScope}
+	clientIDs = []string{clientID, endpoints.ApiExplorerClientId}
+	// in case we'll want to use TicTacToe API from an Android app
+	audiences = []string{clientID}
 )
 
 // Action is a
@@ -51,7 +60,7 @@ func (as *ActionsService) List(r *http.Request, req *ActionsListReq, resp *Actio
 	if err != nil {
 		return err
 	}
-	userKey := makeUserKey(c, u.ID)
+	userKey := makeUserKey(c, u.Email)
 	q := datastore.NewQuery(actionKind).Ancestor(userKey)
 	if len(req.Phrase) > 0 {
 		for _, w := range strings.Split(req.Phrase, " ") {
@@ -80,7 +89,8 @@ type ActionAddReq struct {
 	Redirect string `json:"redirect"`
 }
 
-func makeUserKey(c appengine.Context, userID string) *datastore.Key {
+func makeUserKey(c appengine.Context, userEmail string) *datastore.Key {
+	userID := fmt.Sprintf("%x", md5.Sum([]byte(userEmail)))
 	return datastore.NewKey(c, accountKind, userID, 0, nil)
 }
 
@@ -105,7 +115,7 @@ func (as *ActionsService) Add(r *http.Request, req *ActionAddReq, resp *ActionAd
 		Date:         time.Now(),
 		UserID:       u.ID,
 	}
-	putKey := datastore.NewIncompleteKey(c, actionKind, makeUserKey(c, u.ID)) // no id, let it auto generate.
+	putKey := datastore.NewIncompleteKey(c, actionKind, makeUserKey(c, u.Email)) // no id, let it auto generate.
 	_, err = datastore.Put(c, putKey, act)
 	if err != nil {
 		return err
@@ -124,20 +134,26 @@ func init() {
 	info := api.MethodByName("List").Info()
 	info.Name, info.HttpMethod, info.Path, info.Desc =
 		"list", "GET", "list", "List most recent actions."
+	info.Scopes, info.ClientIds, info.Audiences = scopes, clientIDs, audiences
 
 	add := api.MethodByName("Add").Info()
 	add.Name, add.HttpMethod, add.Path, add.Desc =
 		"add", "PUT", "add", "Add an action."
+	add.Scopes, add.ClientIds, add.Audiences = scopes, clientIDs, audiences
 
 	endpoints.HandleHttp()
 	http.HandleFunc("/", handler)
 }
 
-func getUser(ctx appengine.Context) (*user.User, error) {
-	u := user.Current(ctx)
-	if u == nil {
-		return nil, fmt.Errorf("Not Logged in")
+func getUser(c endpoints.Context) (*user.User, error) {
+	u, err := endpoints.CurrentUser(c, scopes, audiences, clientIDs)
+	if err != nil {
+		return nil, err
 	}
+	if u == nil {
+		return nil, errors.New("Unauthorized: Please, sign in.")
+	}
+	c.Debugf("Current user: %#v", u)
 	return u, nil
 }
 
@@ -145,24 +161,16 @@ func templatePath(fname string) string {
 	return "client/templates/" + fname
 }
 
+type TemplateParams struct {
+	ClientID string
+}
+
 func handler(w http.ResponseWriter, r *http.Request) {
-	c := appengine.NewContext(r)
-	u := user.Current(c)
-	if u == nil {
-		url, err := user.LoginURL(c, r.URL.String())
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-			return
-		}
-		w.Header().Set("Location", url)
-		w.WriteHeader(http.StatusFound)
-		return
-	}
 	basePageTemplate, err := template.New("basePagetemplate").Delims("<<<", ">>>").ParseFiles(templatePath("base.html"))
 	if err != nil {
 		http.Error(w, "Yeah!"+err.Error(), http.StatusInternalServerError)
 	}
-	err = basePageTemplate.ExecuteTemplate(w, "base.html", u.ID)
+	err = basePageTemplate.ExecuteTemplate(w, "base.html", TemplateParams{ClientID: clientID})
 	if err != nil {
 		http.Error(w, "Eooh!"+err.Error(), http.StatusInternalServerError)
 	}

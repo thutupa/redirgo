@@ -10,45 +10,45 @@ input,button {
     </style>
   </head>
   <body style="background-color: #DFDFDF; font-size: 20px" ng-controller="ActionsCtrl as ctrl">
-  <script type="text/javascript">
-    CLIENT_ID="<<<.ClientID>>>";
-  </script>
-  <div id="preAuthSpinner">Please wait...</div>
-  <div id="signinButton" style="display: none"><button onclick="signInWithPopup(signInStateChange)">Sign In</button></div>
-  <div id="signoutButton" style="display: none">
-      <h2>Add Form</h2>
-      <table>
-	<tr><td colspan="2"><font color="red" size="+1">{{error}}</font></td></tr>
-	<tr><td colspan="2"><font color="blue">{{message}}</font></td></tr>
-	<tr><td> URL </td><td><input ng-model="redirect" ng-disabled="formDisabled" size=100/></td></tr>
-	<tr><td> Phrase </td><td><input ng-model="words" ng-disabled="formDisabled" size=100/></td></tr>
-	<tr><td></td><td><button ng-click="startActionAdd()" ng-disabled="formDisabled">Add Action</button></td></tr>
-      </table>
-      <hr/>
-      <h2>Existing actions</h2>
-      <table>
-	<tr><th>Link</th><th>Phrase</th><th>Added</th></tr>
-	<tr ng-repeat="action in items">
-	  <td>
-	    <span ng-hide="action.inEdit">{{action.redirectLink}}</span>
-	    <span ng-show="action.inEdit"><input size="40" ng-model="action.editRedirectLink" ng-disabled="action.editDisabled"/></span>
-	  </td>
-	  <td>
-	    <span ng-hide="action.inEdit"><a href="{{action.redirectLink}}">[ <b ng-repeat="word in action.actionWords">{{word}} </b>]</a></span>
-	    <span ng-show="action.inEdit"><input size="40" ng-disabled="action.editDisabled" ng-model="action.editActionWords"/></span>
-	  </td>
-	  <td>{{action.date}}</td>
-	  <td>
-	    <span ng-hide="action.inEdit"><button ng-click="initActionEdit($index)">Edit</button></span>
-	    <span ng-show="action.inEdit"><button ng-click="startActionEdit($index)" ng-disabled="action.editDisabled">Submit</button></span>
-	    <span ng-show="action.inEdit"><button ng-click="cancelActionEdit($index)" ng-disabled="action.editDisabled">Cancel</button></span>
-	  </td>
-	</tr>
-      </table>
-      <hr/>
-  </div>
-    <script src="/client/scripts/init.js"></script>
-    <script src="/client/scripts/actions-controller.js"></script>
-    <script src="https://apis.google.com/js/client.js?onload=init"></script>
-</body>
+    <script type="text/javascript">
+      CLIENT_ID="<<<.ClientID>>>";
+    </script>
+    <div id="preAuthSpinner">Please wait...</div>
+    <div id="signinButton" style="display: none"><button onclick="signInWithPopup(signInStateChange)">Sign In</button></div>
+    <div id="signoutButton" style="display: none">
+	<h2>Add Form</h2>
+	<table>
+	  <tr><td colspan="2"><font color="red" size="+1">{{error}}</font></td></tr>
+	  <tr><td colspan="2"><font color="blue">{{message}}</font></td></tr>
+	  <tr><td> URL </td><td><input ng-model="redirect" ng-disabled="formDisabled" size=100/></td></tr>
+	  <tr><td> Phrase </td><td><input ng-model="words" ng-disabled="formDisabled" size=100/></td></tr>
+	  <tr><td></td><td><button ng-click="startActionAdd()" ng-disabled="formDisabled">Add Action</button></td></tr>
+	</table>
+	<hr/>
+	<h2>Existing actions</h2>
+	<table>
+	  <tr><th>Link</th><th>Phrase</th><th>Added</th></tr>
+	  <tr ng-repeat="action in items">
+	    <td>
+	      <span ng-hide="action.inEdit">{{action.redirectLink}}</span>
+	      <span ng-show="action.inEdit"><input size="40" ng-model="action.editRedirectLink" ng-disabled="action.editDisabled"/></span>
+	    </td>
+	    <td>
+	      <span ng-hide="action.inEdit"><a href="{{action.redirectLink}}">[ <b ng-repeat="word in action.actionWords">{{word}} </b>]</a></span>
+	      <span ng-show="action.inEdit"><input size="40" ng-disabled="action.editDisabled" ng-model="action.editActionWords"/></span>
+	    </td>
+	    <td>{{action.date}}</td>
+	    <td>
+	      <span ng-hide="action.inEdit"><button ng-click="initActionEdit($index)">Edit</button></span>
+	      <span ng-show="action.inEdit"><button ng-click="startActionEdit($index)" ng-disabled="action.editDisabled">Submit</button></span>
+	      <span ng-show="action.inEdit"><button ng-click="cancelActionEdit($index)" ng-disabled="action.editDisabled">Cancel</button></span>
+	    </td>
+	  </tr>
+	</table>
+	<hr/>
+    </div>
+      <script src="/client/scripts/init.js"></script>
+      <script src="/client/scripts/actions-controller.js"></script>
+      <script src="https://apis.google.com/js/client.js?onload=init"></script>
+  </body>
 </html>

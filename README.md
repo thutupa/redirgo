@@ -18,3 +18,7 @@ where your-app-id is replaced by the id of your app, ofcourse.
 * Edit
 * Delete
 
+## Development Log
+* Spent of a lot of time figuring out endpoint routing (it seems to drop the google cookie when routing for endopoints, so user.CurrentUser() does not work.
+* Spent a bunch of time figuring out integration of angularjs and gapi code. Finally figured out angular.bootstrap. Still don't undersatnd providers.
+* Had to wipe out the datastore due to the above issue (was using u.ID in the ancestor key, cannot do that).

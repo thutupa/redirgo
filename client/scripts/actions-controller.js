@@ -25,6 +25,20 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     $scope.$apply();
   }
 
+  $scope.startActionEdit = function(index) {
+    editedItem = $scope.items[index];
+    editedItem.editDisabled = true;
+    gapi.client.action.edit({
+      id: editedItem.id,
+      redirect: editedItem.redirect,
+      words: editedItem.words
+    }).execute($scope.endActionEdit);
+  }
+
+  $scope.endActionEdit = function() {
+    // TODO(syam): Finish this.
+  }
+
   $scope.clearMessage = function() {
     $scope.message = '';
   }

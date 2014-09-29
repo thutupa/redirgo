@@ -101,12 +101,8 @@ func (as *ActionsService) Add(r *http.Request, req *ActionAddReq, resp *ActionAd
 	if err != nil {
 		return err
 	}
-	if u, err := url.Parse(req.Redirect); len(u.Scheme) == 0 || err != nil {
-		if err != nil {
-			return fmt.Errorf("Url not well formed %v", err)
-		} else {
-			return fmt.Errorf("Url not well formed")
-		}
+	if err = ValidateRedirect(req.Redirect); err != nil {
+		return err
 	}
 	act := &Action{
 		Key:          nil,
@@ -119,6 +115,55 @@ func (as *ActionsService) Add(r *http.Request, req *ActionAddReq, resp *ActionAd
 	_, err = datastore.Put(c, putKey, act)
 	if err != nil {
 		return err
+	}
+	return nil
+}
+
+// ActionEditResp is a response type of ActionsService.List method
+type ActionEditResp struct{}
+
+//Request type for ActionsService.List
+type ActionEditReq struct {
+	KeyString string `json:"id"`
+	Words     string `json:"words"`
+	Redirect  string `json:"redirect"`
+}
+
+// Edit adds an action.
+func (as *ActionsService) Edit(r *http.Request, req *ActionEditReq, resp *ActionEditResp) error {
+	c := endpoints.NewContext(r)
+	u, err := getUser(c)
+	if err != nil {
+		return err
+	}
+	if err = ValidateRedirect(req.Redirect); err != nil {
+		return err
+	}
+	key, err := datastore.DecodeKey(req.KeyString)
+	if err != nil {
+		return err
+	}
+	act := &Action{
+		Key:          key,
+		ActionWords:  strings.Split(req.Words, " "),
+		RedirectLink: req.Redirect,
+		Date:         time.Now(),
+		UserID:       u.ID,
+	}
+	_, err = datastore.Put(c, key, act)
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func ValidateRedirect(redirect string) error {
+	if u, err := url.Parse(redirect); len(u.Scheme) == 0 || err != nil {
+		if err != nil {
+			return fmt.Errorf("Url not well formed %v", err)
+		} else {
+			return fmt.Errorf("Url not well formed")
+		}
 	}
 	return nil
 }

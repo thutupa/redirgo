@@ -15,7 +15,6 @@ where your-app-id is replaced by the id of your app, ofcourse.
 * set GOPATH to the directory with app.go so that go can see the endpoints source.
 
 # Missing Features
-* Edit
 * Delete
 
 ## Development Log

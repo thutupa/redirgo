@@ -187,6 +187,11 @@ func init() {
 		"add", "PUT", "add", "Add an action."
 	add.Scopes, add.ClientIds, add.Audiences = scopes, clientIDs, audiences
 
+	edit := api.MethodByName("Edit").Info()
+	edit.Name, edit.HttpMethod, edit.Path, edit.Desc =
+		"edit", "PUT", "edit", "Edit an action."
+	edit.Scopes, edit.ClientIds, edit.Audiences = scopes, clientIDs, audiences
+
 	endpoints.HandleHttp()
 	http.HandleFunc("/", handler)
 }

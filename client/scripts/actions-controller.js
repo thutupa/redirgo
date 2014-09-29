@@ -22,21 +22,48 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
       $scope.setMessage('Added');
       $scope.fetchItems();
     }
-    $scope.$apply();
   }
 
+  $scope.initActionEdit = function(index) {
+    var editedItem = $scope.items[index];
+    editedItem.editRedirectLink = editedItem.redirectLink;
+    editedItem.editActionWords = editedItem.actionWords.join(' ');
+    editedItem.inEdit = true;
+  }
+
+  // When submit button is clicked during the "edit".
   $scope.startActionEdit = function(index) {
-    editedItem = $scope.items[index];
+    var editedItem = $scope.items[index];
+    editedItem.error = '';
     editedItem.editDisabled = true;
     gapi.client.action.edit({
       id: editedItem.id,
-      redirect: editedItem.redirect,
-      words: editedItem.words
-    }).execute($scope.endActionEdit);
+      redirect: editedItem.editRedirectLink,
+      words: editedItem.editActionWords
+    }).execute(function(resp) {
+      if (resp.error) {
+	editedItem.error = resp.error;
+	editDisabled = false;
+      } else {
+	$scope.endActionEdit(index);
+      }
+    });
   }
 
-  $scope.endActionEdit = function() {
-    // TODO(syam): Finish this.
+  // When cancel button is clicked during the "edit".
+  $scope.cancelActionEdit = function(index) {
+    var editedItem = $scope.items[index];
+    editedItem.inEdit = false;
+  }
+
+  $scope.endActionEdit = function(index) {
+    var editedItem = $scope.items[index];
+    editedItem.error = '';
+    editedItem.inEdit = false;
+    editedItem.editDisabled = false;
+    editedItem.redirectLink = editedItem.editRedirectLink;
+    editedItem.actionWords = editedItem.editActionWords.split(' ');
+    $scope.$apply();
   }
 
   $scope.clearMessage = function() {

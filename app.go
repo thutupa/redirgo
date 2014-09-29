@@ -10,11 +10,12 @@ import (
 	"strings"
 	"time"
 
+	"github.com/crhym3/go-endpoints/endpoints"
+
 	"appengine"
 	"appengine/datastore"
 	"appengine/user"
 )
-import "github.com/crhym3/go-endpoints/endpoints"
 
 const (
 	accountKind = "Account"

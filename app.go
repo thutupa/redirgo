@@ -193,7 +193,7 @@ func init() {
 	edit.Scopes, edit.ClientIds, edit.Audiences = scopes, clientIDs, audiences
 
 	endpoints.HandleHttp()
-	http.HandleFunc("/", handler)
+	http.HandleFunc("/", mainHandler)
 }
 
 func getUser(c endpoints.Context) (*user.User, error) {
@@ -216,7 +216,7 @@ type TemplateParams struct {
 	ClientID string
 }
 
-func handler(w http.ResponseWriter, r *http.Request) {
+func mainHandler(w http.ResponseWriter, r *http.Request) {
 	basePageTemplate, err := template.New("basePagetemplate").Delims("<<<", ">>>").ParseFiles(templatePath("base.html"))
 	if err != nil {
 		http.Error(w, "Yeah!"+err.Error(), http.StatusInternalServerError)

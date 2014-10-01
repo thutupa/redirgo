@@ -26,6 +26,7 @@ input,button {
 	</table>
 	<hr/>
 	<h2>Existing actions</h2>
+	<input ng-model="filterPhrase" ng-keyup="delayedInitRefilter()"/>
 	<table>
 	  <tr><th>Link</th><th>Phrase</th><th>Added</th></tr>
 	  <tr ng-repeat="action in items">

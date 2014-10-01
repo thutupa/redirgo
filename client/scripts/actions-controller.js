@@ -1,5 +1,7 @@
 var actionsApp = angular.module('ActionsApp', []);
 
+var REFILTER_DELAY_MS = 100;
+
 actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
   $scope.startActionAdd = function() {
     gapi.client.action.add({
@@ -9,7 +11,7 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     $scope.formDisabled = true;
     $scope.message = '';
     $scope.error = '';
-    $scope.searchPhrase = '';
+    $scope.filterPhrase = '';
   }
 
   $scope.endActionAdd = function(resp) {
@@ -54,7 +56,7 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
   $scope.cancelActionEdit = function(index) {
     var editedItem = $scope.items[index];
     editedItem.inEdit = false;
-  }
+  };
 
   $scope.endActionEdit = function(index) {
     var editedItem = $scope.items[index];
@@ -64,23 +66,41 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     editedItem.redirectLink = editedItem.editRedirectLink;
     editedItem.actionWords = editedItem.editActionWords.split(' ');
     $scope.$apply();
-  }
+  };
 
   $scope.clearMessage = function() {
     $scope.message = '';
-  }
+  };
 
   $scope.setMessage = function(message) {
     $scope.message = message;
     $timeout($scope.clearMessage, 1000);
-  }
+  };
 
   $scope.fetchItems = function() {
-    gapi.client.action.list({phrase: $scope.searchPhrase}).execute(function(resp) {
+    gapi.client.action.list({phrase: $scope.filterPhrase}).execute(function(resp) {
       $scope.items = resp.items;
       $scope.$apply();
     });
-  }
+  };
+
+  $scope.delayedInitRefilter = function() {
+    // Cancel any existing promise and ignore any
+    // errors in doing so.
+    if ($scope.refilterPromise) {
+      try {
+	$scope.refilterPromise.cancel();
+	console.log('Cancelled existing promise');
+      } catch(e) {
+	console.log('Cancelling existing promise raised exception ' + e);
+      }
+    }
+
+    $scope.refilterPromise = $timeout(function() {
+      $scope.refilterPromise = undefined;
+      $scope.fetchItems();
+    }, REFILTER_DELAY_MS, false /* don't call under $apply -- fetchItems already does it */);
+  };
   $scope.items = [];
   $scope.fetchItems();
 });

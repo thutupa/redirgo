@@ -16,6 +16,12 @@ where your-app-id is replaced by the id of your app, ofcourse.
 
 # Missing Features
 * Delete
+Next steps
+* Prase and store the domain of the link separately.
+* Make domain a top level feature
+* Remove filter field and merge functionality to add
+  * Leverage this duality to instantly surface any duplicates, even before add
+* Implement redirect.
 
 ## Development Log
 * Spent of a lot of time figuring out endpoint routing (it seems to drop the google cookie when routing for endopoints, so user.CurrentUser() does not work.

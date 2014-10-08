@@ -62,7 +62,7 @@ func (as *ActionsService) List(r *http.Request, req *ActionsListReq, resp *Actio
 		return err
 	}
 	userKey := makeUserKey(c, u.Email)
-	q := datastore.NewQuery(actionKind).Ancestor(userKey)
+	q := datastore.NewQuery(actionKind).Ancestor(userKey).Order("date")
 	if len(req.Phrase) > 0 {
 		for _, w := range strings.Split(req.Phrase, " ") {
 			q = q.Filter("actionwords =", w)
@@ -86,8 +86,8 @@ type ActionAddResp struct{}
 
 //Request type for ActionsService.List
 type ActionAddReq struct {
-	Words    string `json:"words"`
-	Redirect string `json:"redirect"`
+	Words    string `json:"actionWords"`
+	Redirect string `json:"redirectLink"`
 }
 
 func makeUserKey(c appengine.Context, userEmail string) *datastore.Key {
@@ -126,8 +126,8 @@ type ActionEditResp struct{}
 //Request type for ActionsService.List
 type ActionEditReq struct {
 	KeyString string `json:"id"`
-	Words     string `json:"words"`
-	Redirect  string `json:"redirect"`
+	Words     string `json:"actionWords"`
+	Redirect  string `json:"redirectLink"`
 }
 
 // Edit adds an action.

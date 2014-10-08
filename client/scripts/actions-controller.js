@@ -1,13 +1,17 @@
 var actionsApp = angular.module('ActionsApp', []);
 
-var REFILTER_DELAY_MS = 100;
+var REFILTER_DELAY_MS = 250;
 
 actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
   $scope.startActionAdd = function() {
-    gapi.client.action.add({
-        redirect: $scope.redirect,
-        words: $scope.words
-    }).execute($scope.endActionAdd);
+    var toAdd = {
+        redirectLink: $scope.addRedirectLink,
+        actionWords: $scope.addActionWords,
+        inMemory: true
+    };
+    $scope.items.push(toAdd);
+
+    gapi.client.action.add(toAdd).execute($scope.endActionAdd);
     $scope.formDisabled = true;
     $scope.message = '';
     $scope.error = '';
@@ -19,8 +23,8 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     if (resp.error) {
       $scope.error = resp.error.message;
     } else {
-      $scope.redirect = '';
-      $scope.words = '';
+      $scope.addRedirectLink = '';
+      $scope.addActionWords = '';
       $scope.setMessage('Added');
       $scope.fetchItems();
     }
@@ -40,8 +44,8 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     editedItem.editDisabled = true;
     gapi.client.action.edit({
       id: editedItem.id,
-      redirect: editedItem.editRedirectLink,
-      words: editedItem.editActionWords
+      redirectLink: editedItem.editRedirectLink,
+      actionWords: editedItem.editActionWords
     }).execute(function(resp) {
       if (resp.error) {
 	editedItem.error = resp.error;
@@ -78,7 +82,9 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
   };
 
   $scope.fetchItems = function() {
+    $scope.fetchItemsInProgress = true;
     gapi.client.action.list({phrase: $scope.filterPhrase}).execute(function(resp) {
+      $scope.fetchItemsInProgress = false;
       $scope.items = resp.items;
       $scope.$apply();
     });

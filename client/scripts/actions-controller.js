@@ -85,7 +85,7 @@ actionsApp.controller('ActionsCtrl', function($scope, $timeout) {
     $scope.fetchItemsInProgress = true;
     gapi.client.action.list({phrase: $scope.filterPhrase}).execute(function(resp) {
       $scope.fetchItemsInProgress = false;
-      $scope.items = resp.items;
+      $scope.items = resp.items || [];
       $scope.$apply();
     });
   };

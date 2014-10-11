@@ -11,7 +11,7 @@ function signInStateChange() {
     } else {
       document.querySelector('#signinButton').style.display = 'none';
       document.querySelector('#signoutButton').style.display = 'block';
-      var $injector = angular.bootstrap(document, ["ActionsApp"]);
+      var $injector = angular.bootstrap(document, [window.AngularApp]);
     }
   });
 }

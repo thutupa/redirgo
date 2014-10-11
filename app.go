@@ -193,6 +193,7 @@ func init() {
 	edit.Scopes, edit.ClientIds, edit.Audiences = scopes, clientIDs, audiences
 
 	endpoints.HandleHttp()
+	http.HandleFunc("/breathe", breatheHandler)
 	http.HandleFunc("/", mainHandler)
 }
 
@@ -216,13 +217,21 @@ type TemplateParams struct {
 	ClientID string
 }
 
-func mainHandler(w http.ResponseWriter, r *http.Request) {
-	basePageTemplate, err := template.New("basePagetemplate").Delims("<<<", ">>>").ParseFiles(templatePath("base.html"))
+func handler(w http.ResponseWriter, r *http.Request, templateFile string) {
+	basePageTemplate, err := template.New("basePagetemplate").Delims("<<<", ">>>").ParseFiles(templatePath(templateFile))
 	if err != nil {
 		http.Error(w, "Yeah!"+err.Error(), http.StatusInternalServerError)
 	}
-	err = basePageTemplate.ExecuteTemplate(w, "base.html", TemplateParams{ClientID: clientID})
+	err = basePageTemplate.ExecuteTemplate(w, templateFile, TemplateParams{ClientID: clientID})
 	if err != nil {
 		http.Error(w, "Eooh!"+err.Error(), http.StatusInternalServerError)
 	}
+}
+
+func mainHandler(w http.ResponseWriter, r *http.Request) {
+	handler(w, r, "base.html")
+}
+
+func breatheHandler(w http.ResponseWriter, r *http.Request) {
+	handler(w, r, "breathe.html")
 }

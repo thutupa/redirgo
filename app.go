@@ -210,7 +210,7 @@ func getUser(c endpoints.Context) (*user.User, error) {
 }
 
 func templatePath(fname string) string {
-	return "client/templates/" + fname
+	return "templates/" + fname
 }
 
 type TemplateParams struct {
@@ -221,10 +221,12 @@ func handler(w http.ResponseWriter, r *http.Request, templateFile string) {
 	basePageTemplate, err := template.New("basePagetemplate").Delims("<<<", ">>>").ParseFiles(templatePath(templateFile))
 	if err != nil {
 		http.Error(w, "Yeah!"+err.Error(), http.StatusInternalServerError)
+		return
 	}
 	err = basePageTemplate.ExecuteTemplate(w, templateFile, TemplateParams{ClientID: clientID})
 	if err != nil {
 		http.Error(w, "Eooh!"+err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 

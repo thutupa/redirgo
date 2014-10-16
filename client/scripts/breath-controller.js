@@ -18,8 +18,6 @@ app.controller('BreathCtrl', function($scope, $interval) {
   $scope.nowMs = function() { return (new Date()).getTime(); }
 
   $scope.cycleTimeMs = function() {
-    console.log($scope.breatheInTimeMs());
-    console.log($scope.breatheOutTimeMs());
     return $scope.breatheInTimeMs() + $scope.breatheOutTimeMs();
   }
 

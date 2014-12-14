@@ -54,6 +54,25 @@ type ActionsListReq struct {
 	Phrase string `json:"phrase"`
 }
 
+func lookupActionsForPhrase(c appengine.Context, email, phrase string) (actions []*Action, err error) {
+	userKey := makeUserKey(c, email)
+	q := datastore.NewQuery(actionKind).Ancestor(userKey).Order("date")
+	if len(phrase) > 0 {
+		for _, w := range strings.Split(phrase, " ") {
+			q = q.Filter("actionwords =", w)
+		}
+	}
+	keys, err := q.GetAll(c, &actions)
+	if err != nil {
+		return actions, err
+	}
+
+	for i, k := range keys {
+		actions[i].Key = k
+	}
+	return actions, nil
+}
+
 // List returns a list of matching actions
 func (as *ActionsService) List(r *http.Request, req *ActionsListReq, resp *ActionsListResp) error {
 	c := endpoints.NewContext(r)
@@ -61,23 +80,9 @@ func (as *ActionsService) List(r *http.Request, req *ActionsListReq, resp *Actio
 	if err != nil {
 		return err
 	}
-	userKey := makeUserKey(c, u.Email)
-	q := datastore.NewQuery(actionKind).Ancestor(userKey).Order("date")
-	if len(req.Phrase) > 0 {
-		for _, w := range strings.Split(req.Phrase, " ") {
-			q = q.Filter("actionwords =", w)
-		}
-	}
-	var actions []*Action
-	keys, err := q.GetAll(c, &actions)
-	if err != nil {
+	if resp.Items, err = lookupActionsForPhrase(c, u.Email, req.Phrase); err != nil {
 		return err
 	}
-
-	for i, k := range keys {
-		actions[i].Key = k
-	}
-	resp.Items = actions
 	return nil
 }
 
@@ -194,6 +199,7 @@ func init() {
 
 	endpoints.HandleHttp()
 	http.HandleFunc("/breathe", breatheHandler)
+	http.HandleFunc("/redirect", redirectHandler)
 	http.HandleFunc("/", mainHandler)
 }
 
@@ -236,4 +242,32 @@ func mainHandler(w http.ResponseWriter, r *http.Request) {
 
 func breatheHandler(w http.ResponseWriter, r *http.Request) {
 	handler(w, r, "breathe.html")
+}
+
+func redirectHandler(w http.ResponseWriter, r *http.Request) {
+	c := appengine.NewContext(r)
+	u := user.Current(c)
+	if u == nil {
+		url, _ := user.LoginURL(c, r.URL.RequestURI())
+		http.Redirect(w, r, url, http.StatusFound)
+		return
+	}
+	phrase := r.FormValue("p")
+	c.Infof("Phrase = %v", phrase)
+	c.Infof("Email = %v", u.Email)
+	actions, err := lookupActionsForPhrase(c, u.Email, phrase)
+	if err != nil {
+		http.Error(w, "Eooh!"+err.Error(), http.StatusInternalServerError)
+		return
+	}
+	if len(actions) == 1 {
+		http.Redirect(w, r, actions[0].RedirectLink, http.StatusFound)
+		return
+	}
+	if len(actions) == 0 {
+		fmt.Fprintf(w, "Found none.")
+	} else {
+		// TODO(syam): Print a nice form.
+		fmt.Fprintf(w, "Found too many.")
+	}
 }
